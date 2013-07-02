@@ -1,0 +1,26 @@
+html, body {
+    margin: 0;
+    padding: 0;
+}
+canvas {
+    background-color: #000044;
+}
+ul, li {
+    display: block;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    overflow: auto;
+}
+li {
+    float: left;
+    width: 100px;
+}
+a {
+    font-size: 20px;
+    font-family: sans-serif;
+    display: block;
+    text-align: center;
+    vertical-align: middle;
+    line-height: 44px;
+}
