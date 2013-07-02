@@ -1,4 +1,10 @@
 (function(){
+
+var RENDERER = ['WebGL', 'Canvas'][!!window.WebGLRenderingContext ? 0 : 1];
+var DENSITY = RENDERER === 'WebGL' ? 12 : 6;
+var MATERIAL = ['Basic', 'Lambert', 'Normal', 'Phong'][RENDERER === 'WebGL' ? 3 : 0];
+
+
 var wl = null;
 window.onload = doLoad;
 window.onhashchange = doLoad;
@@ -128,9 +134,10 @@ function convertToGeometries(patchesAndVerticies, scale, rx, ry, rz, tx, ty, tz)
         var verticies = patchesAndVerticies.verticies;
         
         var i, leni, j, lenj, k, lenk, patch, points, vertex, density, surfacePoints, linePoints;
-        density = 6;
+        density = DENSITY;
         
-        var geometries = [];
+        var mergedGeometry = new THREE.Geometry();
+        //var geometries = [];
         
         for (i=0, leni=patches.length; i<leni; i++) {
             linePoints = [];
@@ -181,21 +188,33 @@ function convertToGeometries(patchesAndVerticies, scale, rx, ry, rz, tx, ty, tz)
             
             //console.log('a');
             //debugger;
-            
+            /*
             geometry.computeCentroids();
             geometry.computeFaceNormals();
             geometry.computeVertexNormals();
-
             if (geometry.hasTangents) {
                 geometry.computeTangents();
             }
             geometry.computeBoundingSphere();
             geometry.computeBoundingBox();
-            THREE.GeometryUtils.triangulateQuads(geometry);
-            geometries.push(geometry);
+            //THREE.GeometryUtils.triangulateQuads(geometry);
+            */
+            THREE.GeometryUtils.merge(mergedGeometry, geometry);
+            
+            //geometries.push(geometry);
         }
         
-        resolver.resolve(geometries);
+        mergedGeometry.computeCentroids();
+        mergedGeometry.computeFaceNormals();
+        mergedGeometry.computeVertexNormals();
+        if (mergedGeometry.hasTangents) {
+            mergedGeometry.computeTangents();
+        }
+        mergedGeometry.computeBoundingSphere();
+        mergedGeometry.computeBoundingBox();
+        console.log('one');
+        resolver.resolve([mergedGeometry]);
+        //resolver.resolve(geometries);
     });
 }
 
@@ -218,8 +237,17 @@ function createObjectAndRender(geometries){
 
     // create a WebGL renderer, camera
     // and a scene
-    //var renderer = new THREE.WebGLRenderer();
-    var renderer = new THREE.CanvasRenderer();
+    var renderer = null;
+    if (RENDERER === 'WebGL') {
+        try {
+            renderer = new THREE.WebGLRenderer();
+        } catch (e) {
+            RENDERER = 'Canvas';
+        }
+    }
+    if (RENDERER === 'Canvas') {
+        renderer = new THREE.CanvasRenderer();
+    }
     var camera = new THREE.PerspectiveCamera(
                                     VIEW_ANGLE,
                                     ASPECT,
@@ -240,37 +268,36 @@ function createObjectAndRender(geometries){
     $container.appendChild(renderer.domElement);
 
     // create the sphere's material
-    var sphereMaterial = new THREE.MeshLambertMaterial({
-        color: 0xCC0000
-    });
+    //var sphereMaterial = new THREE.MeshLambertMaterial({
+    //    color: 0xCC0000
+    //});
     
-
-    // set up the sphere vars
-    var radius = 400, segments = 16, rings = 16;
-
-    // create a new mesh with sphere geometry -
-    // we will cover the sphereMaterial next!
-    var sphereGeometry = new THREE.SphereGeometry(radius, segments, rings);
-    //var sphere = new THREE.Mesh(
-    //   sphereGeometry,
-    //   sphereMaterial);
-    
-    //console.log(sphereGeometry.boundingSphere);
-    //console.log(mergedGeometry.boundingSphere);
     var myObject = new THREE.Object3D();
+    var material = null;
+    switch (MATERIAL) {
+        case 'Lambert':
+            material = new THREE.MeshLambertMaterial();
+            break;
+        case 'Normal':
+            material = new THREE.MeshNormalMaterial()
+            break;
+        case 'Phong':
+            material = new THREE.MeshPhongMaterial()
+            break;
+        default:
+            material = new THREE.MeshBasicMaterial({color: 0x30B209, wireframe: true});
+    }
     for (var i=0, len = geometries.length; i<len; i++) {
         var myMesh = new THREE.Mesh(
             geometries[i],
-            new THREE.MeshBasicMaterial({color: 0x30B209, wireframe: true})
-            //new THREE.MeshLambertMaterial()
-            //new THREE.MeshNormalMaterial()
-            //new THREE.MeshPhongMaterial()
+            material
             );
         myObject.add(myMesh);
     }
     
-    //var cube = new THREE.Mesh( new THREE.CubeGeometry( 200, 200, 200 ), new THREE.MeshNormalMaterial() );
-    //scene.add(cube);
+    //['Basic', 'Lambert', 'Normal', 'Phong']
+    
+    
     
     //console.log(myObject);
     myObject.position.y = -100;
@@ -286,11 +313,11 @@ function createObjectAndRender(geometries){
     scene.add(camera);
 
     // create a point light
-    var pointLight = new THREE.PointLight( 0xFFFFFF );
+    var pointLight = new THREE.PointLight(0xFFFFFF);
 
     // set its position
-    pointLight.position.x = 10;
-    pointLight.position.y = 50;
+    pointLight.position.x = -2000;
+    pointLight.position.y = 2000;
     pointLight.position.z = 5000;
 
     // add to the scene
@@ -302,6 +329,8 @@ function createObjectAndRender(geometries){
     function animate(currentTime){
         if (currentTime > previousime + 1000 / 24) {
             previousime = currentTime;
+            //pointLight.position.x = Math.sin(currentTime / 100 / 3) * 3000;
+            //pointLight.position.y = Math.cos(currentTime / 100 / 3) * 3000;
             render();
         }
         requestAnimationFrame(animate);

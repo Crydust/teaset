@@ -98,9 +98,11 @@ var _public = function(v) { return _method(v, 1); };
 
 var isThenable = function(any) {
   try {
-    var f = any.then;
-    if (typeof f == "function") {
-      return true;
+    if (typeof any === 'object') {
+      var f = any.then;
+      if (typeof f == "function") {
+        return true;
+      }
     }
   } catch (e) { /*squelch*/ }
   return false;

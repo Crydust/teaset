@@ -1,4 +1,7 @@
 (function(){
+
+var DENSITY = 6;
+
 var wl = null;
 window.onload = doLoad;
 window.onhashchange = doLoad;
@@ -127,7 +130,7 @@ function drawModel(patchesAndVerticies, scale, rx, ry, rz, tx, ty, tz) {
         wl.stop();
     }
     wl = new Wirelib(canvas1);
-    density = 4;
+    density = DENSITY;
     //wl.showCenter = true;
     wl.strokeStyle = "#30B209";
     //wl.strokeStyle = "rgba(50, 200, 9, 0.2)";
