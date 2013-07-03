@@ -14,7 +14,11 @@ ul, li {
 }
 li {
     float: left;
-    width: 100px;
+    width: 90px;
+}
+li.back {
+    float: left;
+    width: 30px;
 }
 a {
     font-size: 20px;

@@ -1,9 +1,19 @@
 (function(){
 
 var RENDERER = ['WebGL', 'Canvas'][!!window.WebGLRenderingContext ? 0 : 1];
-var DENSITY = RENDERER === 'WebGL' ? 12 : 6;
+var DENSITY = (RENDERER === 'WebGL' ? 12 : 6);
 var MATERIAL = ['Basic', 'Lambert', 'Normal', 'Phong'][RENDERER === 'WebGL' ? 3 : 0];
+var MOVING_LIGHT = false;
+var WIDTH = 300;
+var HEIGHT = 300;
 
+if (navigator.userAgent.toLowerCase().indexOf('iphone') !== -1
+|| navigator.userAgent.toLowerCase().indexOf('ipod') !== -1
+|| navigator.userAgent.toLowerCase().indexOf('ipad') !== -1) {
+    RENDERER = 'Canvas';
+    MATERIAL = 'Basic';
+    DENSITY = 4;
+}
 
 var wl = null;
 window.onload = doLoad;
@@ -223,8 +233,8 @@ function convertToGeometries(patchesAndVerticies, scale, rx, ry, rz, tx, ty, tz)
 function createObjectAndRender(geometries){
 
     // set the scene size
-    var WIDTH = 300,
-        HEIGHT = 300;
+    //var WIDTH = 300,
+    //    HEIGHT = 300;
 
     // set some camera attributes
     var VIEW_ANGLE = 45,
@@ -243,6 +253,7 @@ function createObjectAndRender(geometries){
             renderer = new THREE.WebGLRenderer();
         } catch (e) {
             RENDERER = 'Canvas';
+            MATERIAL = 'Basic';
         }
     }
     if (RENDERER === 'Canvas') {
@@ -329,8 +340,10 @@ function createObjectAndRender(geometries){
     function animate(currentTime){
         if (currentTime > previousime + 1000 / 24) {
             previousime = currentTime;
-            //pointLight.position.x = Math.sin(currentTime / 100 / 3) * 3000;
-            //pointLight.position.y = Math.cos(currentTime / 100 / 3) * 3000;
+            if (MOVING_LIGHT) {
+                pointLight.position.x = Math.sin(currentTime / 100 / 3) * 3000;
+                pointLight.position.y = Math.cos(currentTime / 100 / 3) * 3000;
+            }
             render();
         }
         requestAnimationFrame(animate);
