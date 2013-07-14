@@ -38,12 +38,9 @@ QUnit.test("test trimString(str)", function (assert) {
 });
 QUnit.test("test loadPatch(fp)", function (assert) {
     "use strict";
-    QUnit.stop();
-    loadPatch(this.PATCH_FILE_CONTENTS).then(function (o) {
-        assert.ok(o.patches.length === 1);
-        assert.ok(o.verticies.length === 16);
-        QUnit.start();
-    });
+    var o = loadPatch(this.PATCH_FILE_CONTENTS);
+    assert.ok(o.patches.length === 1);
+    assert.ok(o.verticies.length === 16);
 });
 QUnit.test("test cubic_1d(a, b, c, d, t)", function (assert) {
     "use strict";
@@ -75,15 +72,13 @@ QUnit.test("test cubic_3d(a, b, c, d, t)", function (assert) {
 });
 QUnit.test("test patchToSurface(patchPoints, density)", function (assert) {
     "use strict";
-    QUnit.stop();
-    loadPatch(this.PATCH_FILE_CONTENTS).then(function (o) {
-        var surface = patchToSurface(o.verticies, 3);
-        assert.equal(surface.length, 4);
-        assert.equal(surface[0].length, 4);
-        assert.deepEqual(surface[0][0], [0.0, 0.0, 0.0]);
-        assert.deepEqual(surface[0][3], [3.0, 0.0, 0.0]);
-        assert.deepEqual(surface[3][0], [0.0, 3.0, 0.0]);
-        assert.deepEqual(surface[3][3], [3.0, 3.0, 0.0]);
-        QUnit.start();
-    });
+    var o = loadPatch(this.PATCH_FILE_CONTENTS);
+    var surface = patchToSurface(o.verticies, 3);
+    assert.equal(surface.length, 4);
+    assert.equal(surface[0].length, 4);
+    assert.deepEqual(surface[0][0], [0.0, 0.0, 0.0]);
+    assert.deepEqual(surface[0][3], [3.0, 0.0, 0.0]);
+    assert.deepEqual(surface[3][0], [0.0, 3.0, 0.0]);
+    assert.deepEqual(surface[3][3], [3.0, 3.0, 0.0]);
+    
 });

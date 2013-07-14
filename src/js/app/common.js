@@ -27,30 +27,26 @@ function loadText(url) {
     });
 }
 
-function loadPatch(fp) {
-    return new Promise(function(resolver) {
+function loadPatch(text) {
+    var patches = [];
+    var verticies = [];
     
-        var patches = [];
-        var verticies = [];
-        
-        var lines = fp.split("\n").map(trimString);
+    var lines = text.split("\n").map(trimString);
 
-        lines.forEach(function(line){
-            if (/^(?:\d+,){15}\d+$/.test(line)) {
-                patches.push(line.split(",").map(
-                        function(num){return parseInt(num, 10) - 1;}
-                        ));
-            }
-            else if (/^(?:[\-0-9\.]+,){2}[\-0-9\.]+$/.test(line)) {
-                verticies.push(line.split(",").map(parseFloat));
-            }
-        });
-        
-        resolver.resolve({
-            patches: patches,
-            verticies: verticies
-        });
+    lines.forEach(function(line){
+        if (/^(?:\d+,){15}\d+$/.test(line)) {
+            patches.push(line.split(",").map(
+                    function(num){return parseInt(num, 10) - 1;}
+                    ));
+        }
+        else if (/^(?:[\-0-9\.]+,){2}[\-0-9\.]+$/.test(line)) {
+            verticies.push(line.split(",").map(parseFloat));
+        }
     });
+    return {
+        patches: patches,
+        verticies: verticies
+    };
 }
 
 function cubic_1d(a, b, c, d, t) {

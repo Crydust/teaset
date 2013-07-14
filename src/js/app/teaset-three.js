@@ -1,7 +1,7 @@
-(function(){
+(function () {
 
 var RENDERER = ['WebGL', 'Canvas'][!!window.WebGLRenderingContext ? 0 : 1];
-var DENSITY = (RENDERER === 'WebGL' ? 12 : 6);
+var DENSITY = (RENDERER === 'WebGL' ? 12 : 4);
 var MATERIAL = ['Basic', 'Lambert', 'Normal', 'Phong'][RENDERER === 'WebGL' ? 3 : 0];
 var MOVING_LIGHT = false;
 var WIDTH = 300;
@@ -11,6 +11,8 @@ if (navigator.userAgent.toLowerCase().indexOf('iphone') !== -1
 || navigator.userAgent.toLowerCase().indexOf('ipod') !== -1
 || navigator.userAgent.toLowerCase().indexOf('ipad') !== -1) {
     RENDERER = 'Canvas';
+}
+if (RENDERER === 'Canvas') {
     MATERIAL = 'Basic';
     DENSITY = 4;
 }
