@@ -1,13 +1,11 @@
 /*jslint browser: true, devel: true, vars: true, white: true, plusplus: true */
-/*global Promise, BABYLON, patchToSurface, loadText, loadPatch, DEBUG: true */
+/*global Promise, BABYLON, patchToSurface, loadText, loadPatch, DEBUG, Stats */
 (function () {
     'use strict';
         
     var DEBUG = window.DEBUG || false;
     var DENSITY = 12;
     var MOVING_LIGHT = false;
-    var WIDTH = 300;
-    var HEIGHT = 300;
     
     function MyPoint(x, y, z) {
         // index in the mesh vertices array
@@ -192,56 +190,66 @@
                 modelId = 'teapot';
             }
         }
-        if (BABYLON.Engine.isSupported()) {
-        loadText(modelId + '.txt')
-        .then(function(text){
-            var patchesAndVerticies = loadPatch(text);
-            //var patchesAndVerticies = patchToSurface(patchPoints, DENSITY);
-            var pointsAndTriangles = convertBezierSurfaceControlPointsToTriangles(patchesAndVerticies);
-            
-            var indexesAndVertexes = convertTrianglesToIndexesAndVertexes(pointsAndTriangles);
         
-            var canvas = document.getElementById("renderCanvas");
-            var engine = new BABYLON.Engine(canvas, true);
-            var scene = new BABYLON.Scene(engine);
-            var camera = new BABYLON.FreeCamera("Camera", new BABYLON.Vector3(0, 0, -10), scene);
-            
-            //var camera1 = new BABYLON.ArcRotateCamera("Camera1", 0, 0.8, 10, BABYLON.Vector3.Zero(), scene);
-
-            //scene.activeCamera = camera1;
-            //camera.attachControl(canvas);
-            
-            var light0 = new BABYLON.PointLight("Omni0", new BABYLON.Vector3(100, -100, 200), scene);
-            //var sphere = BABYLON.Mesh.CreateSphere("Sphere", 16, 4, scene);
-            var mesh = convertIndexesAndVertexesToMesh(indexesAndVertexes, scene);
-            
-            mesh.rotation.x = Math.PI * 2.8 / 2;
-            mesh.position.y = -1.2;
-            
-            // Render loop
-            var renderLoop = function (currentTime) {
-                // Start new frame
-                engine.beginFrame();
+        if (BABYLON.Engine.isSupported()) {
+            loadText(modelId + '.txt')
+            .then(function(text){
+                var patchesAndVerticies = loadPatch(text);
+                //var patchesAndVerticies = patchToSurface(patchPoints, DENSITY);
+                var pointsAndTriangles = convertBezierSurfaceControlPointsToTriangles(patchesAndVerticies);
                 
-                //mesh.rotation.z = alpha;
-                mesh.rotation.z = Math.sin(currentTime / 4000) * Math.PI;
-                
-                if (MOVING_LIGHT) {
-                    light0.position.x = 100 + Math.sin(currentTime / 500) * 100;
-                    light0.position.y = -100 + Math.cos(currentTime / 1000) * 100;
-                }
-                
-                scene.render();
+                var indexesAndVertexes = convertTrianglesToIndexesAndVertexes(pointsAndTriangles);
             
-                // Present
-                engine.endFrame();
-            
-                // Register new frame
+                var stats = new Stats();
+                stats.domElement.style.position = 'absolute';
+                stats.domElement.style.top = '0px';
+                stats.domElement.style.right = '0px';
+                stats.domElement.style.zIndex = 100;
+                document.body.appendChild( stats.domElement );
+                
+                var canvas = document.getElementById("renderCanvas");
+                var engine = new BABYLON.Engine(canvas, true);
+                var scene = new BABYLON.Scene(engine);
+                var camera = new BABYLON.FreeCamera("Camera", new BABYLON.Vector3(0, 0, -10), scene);
+                
+                //var camera1 = new BABYLON.ArcRotateCamera("Camera1", 0, 0.8, 10, BABYLON.Vector3.Zero(), scene);
+    
+                //scene.activeCamera = camera1;
+                //camera.attachControl(canvas);
+                
+                var light0 = new BABYLON.PointLight("Omni0", new BABYLON.Vector3(100, -100, 200), scene);
+                //var sphere = BABYLON.Mesh.CreateSphere("Sphere", 16, 4, scene);
+                var mesh = convertIndexesAndVertexesToMesh(indexesAndVertexes, scene);
+                
+                mesh.rotation.x = Math.PI * 2.8 / 2;
+                mesh.position.y = -1.2;
+                
+                // Render loop
+                var renderLoop = function (currentTime) {
+                    // Start new frame
+                    engine.beginFrame();
+                    
+                    //mesh.rotation.z = alpha;
+                    mesh.rotation.z = Math.sin(currentTime / 4000) * Math.PI;
+                    
+                    if (MOVING_LIGHT) {
+                        light0.position.x = 100 + Math.sin(currentTime / 500) * 100;
+                        light0.position.y = -100 + Math.cos(currentTime / 1000) * 100;
+                    }
+                    
+                    scene.render();
+                
+                    // Present
+                    engine.endFrame();
+                    
+                    stats.update();
+                    
+                    // Register new frame
+                    BABYLON.Tools.QueueNewFrame(renderLoop);
+                };
+                
                 BABYLON.Tools.QueueNewFrame(renderLoop);
-            };
-            
-            BABYLON.Tools.QueueNewFrame(renderLoop);
-        });
+            });
         } else {
             alert('BABYLON.Engine.isSupported() == false');
         }

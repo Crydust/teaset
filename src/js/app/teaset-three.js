@@ -4,8 +4,8 @@ var RENDERER = ['WebGL', 'Canvas'][!!window.WebGLRenderingContext ? 0 : 1];
 var DENSITY = (RENDERER === 'WebGL' ? 12 : 4);
 var MATERIAL = ['Basic', 'Lambert', 'Normal', 'Phong'][RENDERER === 'WebGL' ? 3 : 0];
 var MOVING_LIGHT = false;
-var WIDTH = 300;
-var HEIGHT = 300;
+var WIDTH = window.innerWidth;
+var HEIGHT = window.innerHeight;
 
 if (navigator.userAgent.toLowerCase().indexOf('iphone') !== -1
 || navigator.userAgent.toLowerCase().indexOf('ipod') !== -1
@@ -331,28 +331,32 @@ function createObjectAndRender(geometries){
     // set its position
     pointLight.position.x = -2000;
     pointLight.position.y = 2000;
-    pointLight.position.z = 5000;
+    pointLight.position.z = 4000;
 
     // add to the scene
     scene.add(pointLight);
+    
+    
+    var stats = new Stats();
+    stats.domElement.style.position = 'absolute';
+    stats.domElement.style.top = '0px';
+    stats.domElement.style.right = '0px';
+    stats.domElement.style.zIndex = 100;
+    document.body.appendChild( stats.domElement );
+    
     
     //TODO get rid of raf when switching models
     animate();
     var previousime = 0;
     function animate(currentTime){
-        if (currentTime > previousime + 1000 / 24) {
-            previousime = currentTime;
-            if (MOVING_LIGHT) {
-                pointLight.position.x = Math.sin(currentTime / 100 / 3) * 3000;
-                pointLight.position.y = Math.cos(currentTime / 100 / 3) * 3000;
-            }
-            render();
+        myObject.rotation.z = Math.sin(currentTime / 4000) * Math.PI;
+        renderer.render(scene, camera);
+        if (MOVING_LIGHT) {
+            pointLight.position.x = Math.sin(currentTime / 100 / 3) * 3000;
+            pointLight.position.y = Math.cos(currentTime / 100 / 3) * 3000;
         }
         requestAnimationFrame(animate);
-    }
-    function render(){
-        myObject.rotation.z -= 0.03;
-        renderer.render(scene, camera);
+        stats.update();
     }
 
 }
